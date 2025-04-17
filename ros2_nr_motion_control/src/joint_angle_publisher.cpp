@@ -91,6 +91,7 @@ private:
 
         trajectory_msgs::msg::JointTrajectoryPoint point;
         point.positions = target_positions;
+        point.time_from_start = rclcpp::Duration::from_seconds(0.001);
         goal.trajectory.points.push_back(point);
 
         auto send_goal_options = rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SendGoalOptions();
