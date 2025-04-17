@@ -44,7 +44,7 @@ private:
             q_start_kdl, q_end_kdl, v, a);
 
         current_point_index_ = 0;
-        RCLCPP_INFO(this->get_logger(), "New trajectory generated.");
+        RCLCPP_INFO(this->get_logger(), "\033[1;32mNew trajectory generated!\033[0m");
     }
 
     void publishNextPoint()
