@@ -19,9 +19,13 @@ find_package(rclcpp_action REQUIRED)
 add_executable(joint_angle_publisher src/joint_angle_publisher.cpp)
 ament_target_dependencies(joint_angle_publisher rclcpp rclcpp_action control_msgs trajectory_msgs sensor_msgs)
 
+add_executable(joint_sine_publisher src/joint_sine_publisher.cpp)
+ament_target_dependencies(joint_sine_publisher rclcpp rclcpp_action control_msgs trajectory_msgs sensor_msgs)
+
 
 install(TARGETS
   joint_angle_publisher
+  joint_sine_publisher
   DESTINATION lib/${PROJECT_NAME}
 )
 
