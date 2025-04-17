@@ -30,13 +30,13 @@ def generate_launch_description():
                     name='joint_angle_publisher',
                     output='screen',
                 ),
-                
+
                 Node(
                     package='ros2_nr_motion_control',
-                    executable='joint_sine_publisher',
-                    name='joint_sine_publisher',
+                    executable='joint_space_trajectory_node',
+                    name='joint_space_trajectory_node',
                     output='screen',
-                ),
+                )
             ]
         )
     ])
