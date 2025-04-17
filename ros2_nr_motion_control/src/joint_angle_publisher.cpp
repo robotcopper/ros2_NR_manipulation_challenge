@@ -39,7 +39,7 @@ private:
     {
         if (!msg->positions.empty()) {
             current_target_ = msg->positions;
-            RCLCPP_INFO(this->get_logger(), "\033[1;36mReceived new joint target, sending trajectory...\033[0m");
+            // RCLCPP_INFO(this->get_logger(), "\033[1;36mReceived new joint target, sending trajectory...\033[0m");
             sendTrajectory();
         } else {
             RCLCPP_WARN(this->get_logger(), "Received empty target position.");
@@ -91,7 +91,6 @@ private:
 
         trajectory_msgs::msg::JointTrajectoryPoint point;
         point.positions = target_positions;
-        point.time_from_start = rclcpp::Duration::from_seconds(0.25);
         goal.trajectory.points.push_back(point);
 
         auto send_goal_options = rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SendGoalOptions();
@@ -107,9 +106,9 @@ private:
         goal_active_ = false;
 
         if (result.code == rclcpp_action::ResultCode::SUCCEEDED) {
-            RCLCPP_INFO(this->get_logger(), "\033[1;32mTrajectory successfully followed.\033[0m");
+            // RCLCPP_INFO(this->get_logger(), "\033[1;32mTrajectory successfully followed.\033[0m");
         } else {
-            RCLCPP_ERROR(this->get_logger(), "\033[1;31mFailed to follow trajectory.\033[0m");
+            // RCLCPP_ERROR(this->get_logger(), "\033[1;31mFailed to follow trajectory.\033[0m");
         }
     }
 
