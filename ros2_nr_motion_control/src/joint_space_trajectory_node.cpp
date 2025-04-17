@@ -23,30 +23,29 @@ public:
             q_end_kdl(i) = q_end[i];
         }
 
-        // Generate trajectory
-        std::vector<std::vector<double>> trajectory_data =
-            robot_arm_motion_planner::JointTrajectoryPlanner::interpolateJointMotion(
-                q_start_kdl, q_end_kdl, v, a);
+        rclcpp::Rate rate(100);
 
-        rclcpp::Time last_publish_time = this->get_clock()->now();
+        while (rclcpp::ok()) {
+            std::vector<std::vector<double>> trajectory_data =
+                robot_arm_motion_planner::JointTrajectoryPlanner::interpolateJointMotion(
+                    q_start_kdl, q_end_kdl, v, a);
 
-        for (size_t i = 0; i < trajectory_data.size(); i += 3) {
-            trajectory_msgs::msg::JointTrajectoryPoint point;
-            point.time_from_start = rclcpp::Duration::from_seconds(i * 0.01);  // Elapsed time
+            for (size_t i = 0; i < trajectory_data.size(); i += 3) {
+                trajectory_msgs::msg::JointTrajectoryPoint point;
+                point.time_from_start = rclcpp::Duration::from_seconds(i / 3 * 0.01); // Elapsed time
 
-            for (size_t j = 0; j < q_start_kdl.rows(); ++j) {
-                point.positions.push_back(trajectory_data[i][j]);
-                point.velocities.push_back(trajectory_data[i + 1][j]);
-                point.accelerations.push_back(trajectory_data[i + 2][j]);
+                for (size_t j = 0; j < q_start_kdl.rows(); ++j) {
+                    point.positions.push_back(trajectory_data[i][j]);
+                    point.velocities.push_back(trajectory_data[i + 1][j]);
+                    point.accelerations.push_back(trajectory_data[i + 2][j]);
+                }
+
+                publisher_->publish(point);
+                rate.sleep();
             }
 
-            // Waiting time step before publishing
-            rclcpp::Duration wait_time = rclcpp::Duration::from_seconds(0.01);
-            rclcpp::sleep_for(std::chrono::nanoseconds(wait_time.nanoseconds()));
-            
-            publisher_->publish(point);
-
-            last_publish_time = this->get_clock()->now();
+            // Switching points
+            std::swap(q_start_kdl, q_end_kdl);
         }
     }
 
