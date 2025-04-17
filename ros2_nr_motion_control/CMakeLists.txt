@@ -3,7 +3,7 @@ project(ros2_nr_motion_control)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+endif() 
 
 # find dependencies
 find_package(rclcpp REQUIRED)
@@ -27,6 +27,10 @@ install(TARGETS
   joint_angle_publisher
   joint_sine_publisher
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
 include_directories(
