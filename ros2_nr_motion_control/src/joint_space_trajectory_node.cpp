@@ -6,8 +6,8 @@
 
 double q_start[6] = {3.0, -1.0, 0.0, -1.0, 1.0, 0.0};  // Point1
 double q_end[6] = {3.14, -3.0, 2.0, 1.0, -1.0, 3.0};  // Point2
-double v_max = 1.0;  // joints velocity
-double a_max = 1.0;  // joints acceleration
+double v = 1.0;  // joints velocity
+double a = 1.0;  // joints acceleration
 
 class JointTrajectoryPublisher : public rclcpp::Node
 {
@@ -26,7 +26,7 @@ public:
         // Generate trajectory
         std::vector<std::vector<double>> trajectory_data =
             robot_arm_motion_planner::JointTrajectoryPlanner::interpolateJointMotion(
-                q_start_kdl, q_end_kdl, v_max, a_max);
+                q_start_kdl, q_end_kdl, v, a);
 
         rclcpp::Time last_publish_time = this->get_clock()->now();
 
