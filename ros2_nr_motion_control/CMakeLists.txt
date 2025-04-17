@@ -14,22 +14,38 @@ find_package(urdf REQUIRED)
 find_package(action_msgs REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(orocos_kdl_vendor REQUIRED)
+find_package(orocos_kdl REQUIRED)
 
 # Create executable
 add_executable(joint_angle_publisher src/joint_angle_publisher.cpp)
 ament_target_dependencies(joint_angle_publisher rclcpp rclcpp_action control_msgs trajectory_msgs sensor_msgs)
 
 add_executable(joint_sine_publisher src/joint_sine_publisher.cpp)
-ament_target_dependencies(joint_sine_publisher rclcpp rclcpp_action control_msgs trajectory_msgs sensor_msgs)
+ament_target_dependencies(joint_sine_publisher rclcpp trajectory_msgs sensor_msgs)
 
+add_executable(joint_space_trajectory_node src/joint_space_trajectory_node.cpp)
+ament_target_dependencies(joint_space_trajectory_node rclcpp trajectory_msgs)
 
 install(TARGETS
   joint_angle_publisher
   joint_sine_publisher
+  joint_space_trajectory_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY launch
+target_include_directories(joint_space_trajectory_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${EIGEN3_INCLUDE_DIRS}
+)
+
+target_link_libraries(joint_space_trajectory_node
+  orocos-kdl
+)
+
+install(DIRECTORY launch include
   DESTINATION share/${PROJECT_NAME}
 )
 
