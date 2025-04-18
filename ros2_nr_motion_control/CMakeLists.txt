@@ -17,6 +17,7 @@ find_package(rclcpp_action REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(orocos_kdl_vendor REQUIRED)
 find_package(orocos_kdl REQUIRED)
+find_package(kdl_parser REQUIRED)
 
 # Create executable
 add_executable(joint_angle_publisher src/joint_angle_publisher.cpp)
@@ -28,10 +29,14 @@ ament_target_dependencies(joint_sine_publisher rclcpp trajectory_msgs sensor_msg
 add_executable(joint_space_trajectory_node src/joint_space_trajectory_node.cpp)
 ament_target_dependencies(joint_space_trajectory_node rclcpp trajectory_msgs)
 
+add_executable(cartesian_space_trajectory_node src/cartesian_space_trajectory_node.cpp)
+ament_target_dependencies(cartesian_space_trajectory_node rclcpp orocos_kdl kdl_parser urdf trajectory_msgs sensor_msgs )
+
 install(TARGETS
   joint_angle_publisher
   joint_sine_publisher
   joint_space_trajectory_node
+  cartesian_space_trajectory_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
