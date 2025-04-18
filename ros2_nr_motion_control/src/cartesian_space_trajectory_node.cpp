@@ -78,17 +78,21 @@ private:
     double t_;
     KDL::JntArray q_init_;
     rclcpp::TimerBase::SharedPtr timer_;
+    KDL::Frame start_pose_;
+    KDL::Frame end_pose_;
+    double linear_vel_;
+    double linear_acc_;
 
     void solveIK() {
         if (!ik_solver_) return;
     
-        KDL::Frame start_pose( KDL::Rotation::RPY(0.0, M_PI/3, 0.0), KDL::Vector(0.5, 0.5, 0.25));
-        KDL::Frame end_pose( KDL::Rotation::RPY(0.0, -M_PI/2, 0.0), KDL::Vector(-0.25, 0.25, 0.75));
-        double linear_vel = 0.2;
-        double linear_acc = 0.1;
-    
-        traj_ = robot_arm_motion_planner::JointTrajectoryPlanner::GenerateCartesianTrajectory(start_pose, end_pose, linear_vel, linear_acc);
-    
+        start_pose_ = KDL::Frame(KDL::Rotation::RPY(0.0, M_PI / 3, 0.0), KDL::Vector(0.5, 0.5, 0.25)); // Pose1
+        end_pose_ = KDL::Frame(KDL::Rotation::RPY(0.0, -M_PI / 2, 0.0), KDL::Vector(-0.25, 0.25, 0.75)); // Pose2
+        linear_vel_ = 0.2; // linear velocity
+        linear_acc_ = 0.1; // linear acceleration
+
+        traj_ = robot_arm_motion_planner::JointTrajectoryPlanner::GenerateCartesianTrajectory(start_pose_, end_pose_, linear_vel_, linear_acc_);
+        
         t_ = 0.0;
         q_init_ = KDL::JntArray(kdl_chain_.getNrOfJoints());
         for (unsigned int i = 0; i < q_init_.rows(); ++i)
@@ -104,9 +108,11 @@ private:
 
     void publishNextPoint() {
         if (t_ > traj_->Duration()) {
-            timer_->cancel();
             delete traj_;
-            RCLCPP_INFO(this->get_logger(), "Finished trajectory.");
+            std::swap(start_pose_, end_pose_);
+            traj_ = robot_arm_motion_planner::JointTrajectoryPlanner::GenerateCartesianTrajectory(start_pose_, end_pose_, linear_vel_, linear_acc_);
+            t_ = 0.0;
+            RCLCPP_INFO(this->get_logger(), "Swapped start and end. Restarting trajectory.");
             return;
         }
     
