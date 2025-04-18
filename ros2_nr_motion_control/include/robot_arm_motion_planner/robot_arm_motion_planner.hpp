@@ -7,6 +7,12 @@
 #include <vector>
 #include <iostream>
 
+#include <kdl/trajectory_segment.hpp>
+#include <kdl/path_line.hpp>
+#include <kdl/frames.hpp>
+#include <kdl/rotational_interpolation_sa.hpp>
+#include <memory>  // Pour std::unique_ptr
+
 namespace robot_arm_motion_planner
 {
 
@@ -67,6 +73,31 @@ public:
 
         return trajectory;
     }
+
+
+    
+
+
+    static KDL::Trajectory* GenerateCartesianTrajectory(const KDL::Frame& pose1,
+    const KDL::Frame& pose2,
+    double linear_vel,
+    double linear_acc) {
+        using namespace KDL;
+
+        double eq_radius = 0.001;  // tolerance for path equality
+
+        auto* rot_interp = new RotationalInterpolation_SingleAxis();
+        auto* path = new Path_Line(pose1, pose2, rot_interp, eq_radius);
+
+        auto* vel_profile = new VelocityProfile_Trap(linear_vel, linear_acc);
+        vel_profile->SetProfile(0, path->PathLength());
+
+        return new Trajectory_Segment(path, vel_profile);
+    }
+
+        
+
+
 };
 
 }  // namespace robot_arm_motion_planner
