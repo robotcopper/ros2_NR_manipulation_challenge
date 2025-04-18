@@ -23,11 +23,6 @@ public:
             rclcpp::QoS(rclcpp::KeepLast(1))
               .durability(RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL),
             std::bind(&InverseKinematicsNode::on_urdf_received, this, _1));
-          
-
-        joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
-            "/joint_states", 10, std::bind(&InverseKinematicsNode::on_joint_states, this, _1)
-        );
 
         pub_ = this->create_publisher<trajectory_msgs::msg::JointTrajectoryPoint>(
             "/target_joint_positions", 10
@@ -36,16 +31,10 @@ public:
 
 private:
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr urdf_sub_;
-    rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_sub_;
     rclcpp::Publisher<trajectory_msgs::msg::JointTrajectoryPoint>::SharedPtr pub_;
 
-    std::vector<std::string> joint_names_;
     KDL::Chain kdl_chain_;
     std::shared_ptr<KDL::ChainIkSolverPos_LMA> ik_solver_;
-
-    void on_joint_states(const sensor_msgs::msg::JointState::SharedPtr msg) {
-        joint_names_ = msg->name;
-    }
 
     void on_urdf_received(const std_msgs::msg::String::SharedPtr msg) {
         if (ik_solver_) return;
@@ -62,17 +51,19 @@ private:
             return;
         }
 
-        std::string base_link = "base_link"; 
-        std::string tip_link = "wrist_3_link"; 
+        auto first_joint = model.joints_.begin();  // First joint
+        auto last_joint = --model.joints_.end();   // Last joint
+        RCLCPP_INFO(this->get_logger(), "First joint: %s", first_joint->second->name.c_str());
+        RCLCPP_INFO(this->get_logger(), "Last joint: %s", last_joint->second->name.c_str());
+        std::shared_ptr<const urdf::Link> first_parent_link = model.getLink(first_joint->second->parent_link_name);
+        std::shared_ptr<const urdf::Link> last_child_link = model.getLink(last_joint->second->parent_link_name);
+        std::string first_link = first_parent_link->name;  // First link
+        std::string last_link = last_child_link->name;    // Last link
+        RCLCPP_INFO(this->get_logger(), "First link: %s", first_link.c_str());
+        RCLCPP_INFO(this->get_logger(), "Last link: %s", last_link.c_str());
 
-        // auto first_joint = model.getJoint(joint_names_[0]);
-        // auto last_joint = model.getJoint(joint_names_[5]);
-        
-        // std::string base_link = first_joint->parent_link_name;
-        // std::string tip_link = last_joint->child_link_name;
-        
-        if (!kdl_tree.getChain(base_link, tip_link, kdl_chain_)) {
-            RCLCPP_ERROR(this->get_logger(), "Failed to get chain from %s to %s", base_link.c_str(), tip_link.c_str());
+        if (!kdl_tree.getChain(first_link, last_link, kdl_chain_)) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to get chain from %s to %s", first_link.c_str(), last_link.c_str());
             return;
         }
 
