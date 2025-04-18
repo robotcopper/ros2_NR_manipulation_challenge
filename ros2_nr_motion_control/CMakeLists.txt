@@ -45,7 +45,11 @@ target_include_directories(joint_space_trajectory_node PUBLIC
   $<INSTALL_INTERFACE:include>
   ${EIGEN3_INCLUDE_DIRS}
 )
-
+target_include_directories(cartesian_space_trajectory_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${EIGEN3_INCLUDE_DIRS}
+)
 target_link_libraries(joint_space_trajectory_node
   orocos-kdl
 )

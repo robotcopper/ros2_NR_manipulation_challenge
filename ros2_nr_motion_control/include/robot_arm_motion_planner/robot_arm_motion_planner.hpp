@@ -84,7 +84,7 @@ public:
     double linear_acc) {
         using namespace KDL;
 
-        double eq_radius = 0.001;  // tolerance for path equality
+        double eq_radius = 0.01;  // tolerance for path equality
 
         auto* rot_interp = new RotationalInterpolation_SingleAxis();
         auto* path = new Path_Line(pose1, pose2, rot_interp, eq_radius);

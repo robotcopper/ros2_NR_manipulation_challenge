@@ -11,6 +11,7 @@
 #include <kdl/chainiksolverpos_lma.hpp>
 #include <kdl/jntarray.hpp>
 #include <kdl/frames.hpp>
+#include "robot_arm_motion_planner/robot_arm_motion_planner.hpp"
 
 using std::placeholders::_1;
 
@@ -73,30 +74,61 @@ private:
         this->solveIK();
     }
 
+    KDL::Trajectory* traj_;
+    double t_;
+    KDL::JntArray q_init_;
+    rclcpp::TimerBase::SharedPtr timer_;
+
     void solveIK() {
-        if (!ik_solver_) {
-            RCLCPP_WARN(this->get_logger(), "IK solver not ready.");
+        if (!ik_solver_) return;
+    
+        KDL::Frame start_pose( KDL::Rotation::RPY(0.0, M_PI/3, 0.0), KDL::Vector(0.5, 0.5, 0.25));
+        KDL::Frame end_pose( KDL::Rotation::RPY(0.0, -M_PI/2, 0.0), KDL::Vector(-0.25, 0.25, 0.75));
+        double linear_vel = 0.2;
+        double linear_acc = 0.1;
+    
+        traj_ = robot_arm_motion_planner::JointTrajectoryPlanner::GenerateCartesianTrajectory(start_pose, end_pose, linear_vel, linear_acc);
+    
+        t_ = 0.0;
+        q_init_ = KDL::JntArray(kdl_chain_.getNrOfJoints());
+        for (unsigned int i = 0; i < q_init_.rows(); ++i)
+            q_init_(i) = 0.0;
+    
+        timer_ = this->create_wall_timer(
+            std::chrono::duration<double>(0.01),
+            std::bind(&InverseKinematicsNode::publishNextPoint, this)
+        );
+    
+        RCLCPP_INFO(this->get_logger(), "Started IK trajectory timer.");
+    }
+
+    void publishNextPoint() {
+        if (t_ > traj_->Duration()) {
+            timer_->cancel();
+            delete traj_;
+            RCLCPP_INFO(this->get_logger(), "Finished trajectory.");
             return;
         }
-
-        KDL::JntArray q_init(kdl_chain_.getNrOfJoints());
-        for (unsigned int i = 0; i < q_init.rows(); ++i)
-            q_init(i) = 0.0;
-
-        KDL::Frame target_pose(KDL::Rotation::Identity(), KDL::Vector(0.5, 0.5, 0.3));
+    
+        KDL::Frame pose = traj_->Pos(t_);
         KDL::JntArray q_sol(kdl_chain_.getNrOfJoints());
-
-        if (ik_solver_->CartToJnt(q_init, target_pose, q_sol) >= 0) {
+        int ret = ik_solver_->CartToJnt(q_init_, pose, q_sol);
+    
+        if (ret >= 0) {
             trajectory_msgs::msg::JointTrajectoryPoint pt;
             pt.positions.resize(q_sol.rows());
             for (unsigned int i = 0; i < q_sol.rows(); ++i)
                 pt.positions[i] = q_sol(i);
-
+            pt.time_from_start = rclcpp::Duration::from_seconds(t_);
             pub_->publish(pt);
-            RCLCPP_INFO(this->get_logger(), "IK solution published.");
+            RCLCPP_INFO(this->get_logger(), "Published point at t=%.2f", t_);
+    
+            q_init_ = q_sol;
         } else {
-            RCLCPP_ERROR(this->get_logger(), "IK failed.");
+            RCLCPP_WARN(this->get_logger(), "IK failed at t=%.2f", t_);
         }
+    
+        t_ += 0.01;
     }
 };
 
