@@ -127,7 +127,7 @@ private:
                 pt.positions[i] = q_sol(i);
             pt.time_from_start = rclcpp::Duration::from_seconds(t_);
             pub_->publish(pt);
-            RCLCPP_INFO(this->get_logger(), "Published point at t=%.2f", t_);
+            // RCLCPP_INFO(this->get_logger(), "Published point at t=%.2f", t_);
     
             q_init_ = q_sol;
         } else {
