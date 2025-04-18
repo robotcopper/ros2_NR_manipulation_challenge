@@ -62,6 +62,23 @@ include_directories(
   ${action_msgs_INCLUDE_DIRS}
 )
 
+
+# ===[ GTest ]===
+find_package(ament_cmake_gtest REQUIRED)
+
+ament_add_gtest(test_robot_arm_motion_planner
+  test/test_robot_arm_motion_planner.cpp
+)
+target_include_directories(test_robot_arm_motion_planner PRIVATE
+  include
+  ${EIGEN3_INCLUDE_DIR}
+)
+target_link_libraries(test_robot_arm_motion_planner
+  orocos-kdl
+)
+set_tests_properties(test_robot_arm_motion_planner PROPERTIES LABELS "functional")
+
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
@@ -71,7 +88,7 @@ if(BUILD_TESTING)
   # comment the line when this package is in a git repo and when
   # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
+  # ament_lint_auto_find_test_dependencies()
 endif()
 
 ament_package()
