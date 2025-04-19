@@ -13,6 +13,9 @@
 #include <kdl/frames.hpp>
 #include "robot_arm_motion_planner/robot_arm_motion_planner.hpp"
 
+#include <visualization_msgs/msg/marker.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
+
 using std::placeholders::_1;
 
 class InverseKinematicsNode : public rclcpp::Node {
@@ -28,11 +31,14 @@ public:
         pub_ = this->create_publisher<trajectory_msgs::msg::JointTrajectoryPoint>(
             "/target_joint_positions", 10
         );
+
+        marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("/ik_trajectory_markers", 10);
     }
 
 private:
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr urdf_sub_;
     rclcpp::Publisher<trajectory_msgs::msg::JointTrajectoryPoint>::SharedPtr pub_;
+    rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
 
     KDL::Chain kdl_chain_;
     std::shared_ptr<KDL::ChainIkSolverPos_LMA> ik_solver_;
@@ -102,6 +108,8 @@ private:
             std::chrono::duration<double>(0.01),
             std::bind(&InverseKinematicsNode::publishNextPoint, this)
         );
+
+        publishTrajectoryMarkers();
     
         RCLCPP_INFO(this->get_logger(), "Started IK trajectory timer.");
     }
@@ -136,6 +144,53 @@ private:
     
         t_ += 0.01;
     }
+
+    void publishTrajectoryMarkers() {
+        if (!traj_) return;
+    
+        visualization_msgs::msg::MarkerArray marker_array;
+        int id = 0;
+    
+        for (double t = 0.0; t <= traj_->Duration(); t += 0.05) {
+            KDL::Frame pose = traj_->Pos(t);
+    
+            visualization_msgs::msg::Marker marker;
+            marker.header.frame_id = "base_link";
+            marker.header.stamp = this->now();
+            marker.ns = "ik_trajectory";
+            marker.id = id++;
+            marker.type = visualization_msgs::msg::Marker::SPHERE;
+            marker.action = visualization_msgs::msg::Marker::ADD;
+            marker.pose.position.x = pose.p.x();
+            marker.pose.position.y = pose.p.y();
+            marker.pose.position.z = pose.p.z();
+    
+            double x, y, z, w;
+            pose.M.GetQuaternion(x, y, z, w);
+            marker.pose.orientation.x = x;
+            marker.pose.orientation.y = y;
+            marker.pose.orientation.z = z;
+            marker.pose.orientation.w = w;
+    
+            marker.scale.x = 0.02;
+            marker.scale.y = 0.02;
+            marker.scale.z = 0.02;
+                  
+            double duration = traj_->Duration();
+            double normalized_t = t / duration;
+            double mirrored_t = 2.0 * std::min(normalized_t, 1.0 - normalized_t);  
+            double smooth_factor = 0.5 * (1.0 - std::cos(mirrored_t * M_PI)); 
+            marker.color.a = 1.0;
+            marker.color.r = 0.5 + 0.7 * smooth_factor;  
+            marker.color.g = 0.0;
+            marker.color.b = 0.0;  
+
+            marker_array.markers.push_back(marker);
+        }
+    
+        marker_pub_->publish(marker_array);
+    }
+
 };
 
 int main(int argc, char** argv) {

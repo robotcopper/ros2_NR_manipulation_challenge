@@ -18,6 +18,7 @@ find_package(Eigen3 REQUIRED)
 find_package(orocos_kdl_vendor REQUIRED)
 find_package(orocos_kdl REQUIRED)
 find_package(kdl_parser REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 # Create executable
 add_executable(joint_angle_publisher src/joint_angle_publisher.cpp)
@@ -30,7 +31,7 @@ add_executable(joint_space_trajectory_node src/joint_space_trajectory_node.cpp)
 ament_target_dependencies(joint_space_trajectory_node rclcpp trajectory_msgs)
 
 add_executable(cartesian_space_trajectory_node src/cartesian_space_trajectory_node.cpp)
-ament_target_dependencies(cartesian_space_trajectory_node rclcpp orocos_kdl kdl_parser urdf trajectory_msgs sensor_msgs )
+ament_target_dependencies(cartesian_space_trajectory_node rclcpp orocos_kdl kdl_parser urdf trajectory_msgs sensor_msgs visualization_msgs)
 
 install(TARGETS
   joint_angle_publisher
@@ -54,7 +55,7 @@ target_link_libraries(joint_space_trajectory_node
   orocos-kdl
 )
 
-install(DIRECTORY launch include
+install(DIRECTORY launch include rviz
   DESTINATION share/${PROJECT_NAME}
 )
 

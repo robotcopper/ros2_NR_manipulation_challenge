@@ -10,6 +10,7 @@ def generate_launch_description():
     # Specify directory and path to file within package
     ur_simulation_gazebo_pkg_dir = get_package_share_directory('ur_simulation_gazebo')
     ur_simulation_gazebo_launch_file_subpath = 'launch/ur_sim_control.launch.py'
+    rviz_config_file = os.path.join(get_package_share_directory('ros2_nr_motion_control'), "rviz", "view_robot.rviz")
 
     return LaunchDescription([
 
@@ -17,7 +18,17 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 os.path.join(ur_simulation_gazebo_pkg_dir, ur_simulation_gazebo_launch_file_subpath)
             ),
-            launch_arguments={'ur_type': 'ur5'}.items(),
+            launch_arguments={'ur_type': 'ur5',
+                              'launch_rviz': 'False'
+                              }.items(),
+        ),
+
+        Node(
+            package="rviz2",
+            executable="rviz2",
+            name="rviz2",
+            output="log",
+            arguments=["-d", rviz_config_file],
         ),
 
         # Wait 2 seconds for the controller to become available
