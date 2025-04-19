@@ -94,11 +94,21 @@ Generates a sinusoidal trajectory across all joints of the UR5 arm:
 - **Amplitude**: `-0.5 radians`  
 - **Offset**: `-π / 2`
 
+> [!NOTE]  
+>These settings can be changed in 
+>```bash
+>ros2_nr_motion_control
+>└── src/
+>    └── joint_sine_publisher.cpp
+>```
+
 ```bash
 ros2 launch ros2_nr_motion_control sinusoidal_trajectory.launch.py
 ```
+<p align="center">
+    <img src="ros2_nr_motion_control/assets/sine_wave_motion.gif">
+</p>
 
----
 
 ### Joint-Space Trajectory
 
@@ -109,11 +119,21 @@ Executes a smooth trajectory between two joint configurations:
 - **Joint Velocity**: `1.0`  
 - **Joint Acceleration**: `1.0`
 
+> [!NOTE]  
+>These settings can be changed in 
+>```bash
+>ros2_nr_motion_control
+>└── src/
+>    └── joint_space_trajectory_node.cpp
+>```
+
 ```bash
 ros2 launch ros2_nr_motion_control joint_space_trajectory.launch.py
 ```
+<p align="center">
+    <img src="ros2_nr_motion_control/assets/joint_space_motion.gif">
+</p>
 
----
 
 ### Cartesian-Space Trajectory
 
@@ -124,11 +144,26 @@ Plans a trajectory in Cartesian space using inverse kinematics:
 - **Linear Velocity**: `0.2`  
 - **Linear Acceleration**: `0.1`
 
+> [!NOTE]  
+>These settings can be changed in 
+>```bash
+>ros2_nr_motion_control
+>└── src/
+>    └── cartesian_space_trajectory_node.cpp
+>```
+
 ```bash
 ros2 launch ros2_nr_motion_control cartesian_space_trajectory.launch.py
 ```
+<p align="center">
+    <img src="ros2_nr_motion_control/assets/cartesian_motion.gif">
+</p>
 
-Parfait, tu peux ajouter cette précision dans une section dédiée aux **tests**. Voici une version professionnelle et bien intégrée à ton `README.md`, juste après la section "Usage" :
+> [!IMPORTANT]  
+> The inverse kinematics solution in the Cartesian motion does not take into account the case where the trajectory goes outside the robot's workspace. Ensure that the movement points are consistent with the robot's workspace.
+
+> [!NOTE]  
+> The display of motion in joint space and motion in Cartesian space is looped (the beginning becomes the end when a trajectory is executed) for better visualization of motion between the two points only.
 
 ---
 
