@@ -57,9 +57,15 @@ private:
 
     std::vector<std::string> joint_names_;
     rclcpp::Time start_time_;
+
+    /// ############# Settings ############# //
+
     double frequency_ = 0.2; // Hz
     double amplitude_ = -0.5; // radians
     double offset_ = -M_PI / 2.0;
+    
+    /// ############# Settings ############# //
+
 };
 
 int main(int argc, char *argv[])

@@ -18,11 +18,14 @@ public:
         publisher_ = this->create_publisher<trajectory_msgs::msg::JointTrajectoryPoint>(
             "/target_joint_positions", 10);
 
+        /// ############# Settings ############# //
+
         double q_start[6] = {3.0, -1.0, 0.0, -1.0, 1.0, 0.0}; // Point1
         double q_end[6]   = {3.14, -3.0, 2.0, 1.0, -1.0, 3.0}; // Point2
         v = 1.0; // joints velocity
         a = 1.0; // joints acceleration
-
+        
+        /// ############# Settings ############# //
 
         for (int i = 0; i < 6; ++i) {
             q_start_kdl(i) = q_start[i];

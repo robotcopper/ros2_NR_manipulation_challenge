@@ -91,11 +91,15 @@ private:
 
     void solveIK() {
         if (!ik_solver_) return;
-    
+
+        /// ############# Settings ############# //
+
         start_pose_ = KDL::Frame(KDL::Rotation::RPY(0.0, M_PI / 3, 0.0), KDL::Vector(0.5, 0.5, 0.25)); // Pose1
         end_pose_ = KDL::Frame(KDL::Rotation::RPY(0.0, -M_PI / 2, 0.0), KDL::Vector(-0.25, 0.25, 0.75)); // Pose2
         linear_vel_ = 0.2; // linear velocity
         linear_acc_ = 0.1; // linear acceleration
+
+        /// ############# Settings ############# //
 
         traj_ = robot_arm_motion_planner::JointTrajectoryPlanner::GenerateCartesianTrajectory(start_pose_, end_pose_, linear_vel_, linear_acc_);
         
