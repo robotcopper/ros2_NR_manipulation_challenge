@@ -15,7 +15,7 @@ A modular ROS 2 package designed for motion planning and control of a **UR5 robo
   - [Joint-Space Trajectory](#joint-space-trajectory)
   - [Cartesian-Space Trajectory](#cartesian-space-trajectory)
 - [Running Unit Tests](#running-unit-tests)
-
+- [License](#license)
 ---
 
 ## Overview
@@ -36,6 +36,8 @@ This repository provides a ROS 2 control interface for manipulating a UR5 roboti
 │   ├── CMakeLists.txt
 │   ├── package.xml
 │   ├── LICENSE
+│   ├── assets/
+│   │   └── NR_Bonus_Task.pdf
 │   ├── include/
 │   │   └── robot_arm_motion_planner/
 │   │       └── robot_arm_motion_planner.hpp
@@ -184,3 +186,7 @@ ros2_nr_motion_control
 ```
 
 Make sure the workspace has been built beforehand. The output will be displayed directly in the console.
+
+## License
+
+This project is licensed under the [BSD 3-Clause License](LICENSE).
